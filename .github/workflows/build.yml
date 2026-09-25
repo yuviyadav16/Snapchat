@@ -40,16 +40,18 @@ jobs:
           sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           
-          # Play Protect Fix (Target SDK 34)
+          # Target SDK 34 (Play Protect Fix)
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
-          
-          # 100% WORKING KOTLIN FIX (Ye purane aur naye dono formats ko 1.9.24 par set kar dega)
-          sed -i -E "s/ext.kotlin_version = '.+'/ext.kotlin_version = '1.9.24'/g" android/build.gradle
-          sed -i -E 's/org.jetbrains.kotlin.android" version ".*" apply false/org.jetbrains.kotlin.android" version "1.9.24" apply false/g' android/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
+
+      - name: Ultimate Hacker Fix (100% Working)
+        run: |
+          # Flutter ki .flutter-plugins file se exact hidden location nikal kar version 1.3.72 ko 1.9.24 se replace karenge
+          PLUGIN_PATH=$(grep "image_gallery_saver=" .flutter-plugins | cut -d '=' -f 2)
+          sed -i 's/1.3.72/1.9.24/g' "${PLUGIN_PATH}android/build.gradle"
 
       - name: Generate App Icon
         run: dart run flutter_launcher_icons
