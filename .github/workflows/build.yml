@@ -43,14 +43,12 @@ jobs:
           # Play Protect Fix (Target SDK 34)
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
+          
+          # KOTLIN VERSION FIX (Ye line error solve karegi)
+          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.0'/g" android/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
-
-      - name: Force Fix Kotlin Version (Hacker Fix)
-        run: |
-          # Ye command chupchap pub-cache me jaakar purane 1.3.72 version ko modern 1.9.0 se replace kar degi
-          find /home/runner/.pub-cache/ -type f -name "build.gradle" -exec sed -i 's/1.3.72/1.9.0/g' {} +
 
       - name: Generate App Icon
         run: dart run flutter_launcher_icons
