@@ -43,14 +43,13 @@ jobs:
           # Play Protect Fix (Target SDK 34)
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
+          
+          # 100% WORKING KOTLIN FIX (Ye purane aur naye dono formats ko 1.9.24 par set kar dega)
+          sed -i -E "s/ext.kotlin_version = '.+'/ext.kotlin_version = '1.9.24'/g" android/build.gradle
+          sed -i -E 's/org.jetbrains.kotlin.android" version ".*" apply false/org.jetbrains.kotlin.android" version "1.9.24" apply false/g' android/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
-
-      - name: Fix Hidden Package Error
-        run: |
-          # Ye line package download hone ke theek baad uske andar ghus kar 1.3.72 ko 1.9.0 se replace kar degi
-          sed -i 's/1.3.72/1.9.0/g' /home/runner/.pub-cache/hosted/pub.dev/image_gallery_saver-*/android/build.gradle
 
       - name: Generate App Icon
         run: dart run flutter_launcher_icons
