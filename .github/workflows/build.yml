@@ -32,15 +32,15 @@ jobs:
           flutter create --project-name snapchat_offline --platforms=android .
           mv temp_main.dart lib/main.dart
           
-          # 1. App ka naam "Snapchat" set karo
+          # App name "Snapchat"
           sed -i 's/android:label="snapchat_offline"/android:label="Snapchat"/g' android/app/src/main/AndroidManifest.xml
           
-          # 2. Camera aur Storage permissions add karo
+          # Permissions
           sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           
-          # 3. Play Protect / Scam warning hatane ke liye SDK 34 set karo
+          # Target SDK 34 for Play Protect Fix
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
 
