@@ -40,7 +40,7 @@ jobs:
           sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           
-          # Target SDK 34 for Play Protect Fix
+          # Play Protect Fix (Target SDK 34)
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
 
