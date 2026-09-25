@@ -1,4 +1,4 @@
-name: Build Snapchat APK
+name: Build Professional Snapchat APK
 
 on:
   push:
@@ -32,17 +32,20 @@ jobs:
           flutter create --project-name snapchat_offline --platforms=android .
           mv temp_main.dart lib/main.dart
           
-          # 1. App ka naam "Snapchat" set karo
+          # 1. App name "Snapchat"
           sed -i 's/android:label="snapchat_offline"/android:label="Snapchat"/g' android/app/src/main/AndroidManifest.xml
           
-          # 2. CAMERA AUR STORAGE PERMISSIONS ADD KARO
+          # 2. Camera and Storage permissions
           sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
           
-          # 3. SDK 34 fix
+          # 3. Target SDK 34 (Play Protect fix)
           sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
           sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
+          
+          # 4. Gal package compatibility fix
+          echo "android { compileSdkVersion 34 }" >> android/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
