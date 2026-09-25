@@ -1,0 +1,28 @@
+name: snapchat_offline
+description: A secure offline camera app.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.10.5+9
+  path_provider: ^2.1.2
+  path: ^1.9.0
+  gal: ^2.2.1
+
+dev_dependencies:
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "logo.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - logo.png
