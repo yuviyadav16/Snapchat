@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:gal/gal.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:async';
 
 List<CameraDescription> cameras = [];
@@ -38,7 +38,7 @@ class CameraScreen extends StatefulWidget {
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
+class _CameraScreenState extends State<CameraScreen> {
   CameraController? controller;
   bool isCameraInitialized = false;
   int selectedCameraIdx = 0;
@@ -48,37 +48,14 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     if (cameras.isNotEmpty) {
-      initCamera(selectedCameraIdx);
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = controller;
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-    if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
       initCamera(selectedCameraIdx);
     }
   }
 
   Future<void> initCamera(int cameraIdx) async {
     if (cameras.isEmpty) return;
-    final CameraController oldController = controller ?? CameraController(cameras[0], ResolutionPreset.high);
-    await oldController.dispose();
-
+    
     final CameraController cameraController = CameraController(
       cameras[cameraIdx],
       ResolutionPreset.high,
@@ -99,30 +76,19 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     }
   }
 
-  // Camera Switch (Front/Back)
   void switchCamera() {
     if (cameras.length < 2) return;
     selectedCameraIdx = (selectedCameraIdx + 1) % cameras.length;
     initCamera(selectedCameraIdx);
   }
 
-  // Flash Toggle
   Future<void> toggleFlash() async {
     if (controller == null) return;
-    if (flashMode == FlashMode.off) {
-      flashMode = FlashMode.torch;
-    } else {
-      flashMode = FlashMode.off;
-    }
-    try {
-      await controller!.setFlashMode(flashMode);
-      setState(() {});
-    } catch (e) {
-      debugPrint("Error setting flash: $e");
-    }
+    flashMode = flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
+    await controller!.setFlashMode(flashMode);
+    setState(() {});
   }
 
-  // Photo Capture & Gallery Save
   Future<void> takePicture() async {
     if (controller == null || !controller!.value.isInitialized || isCapturing) return;
 
@@ -133,25 +99,15 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     try {
       final image = await controller!.takePicture();
       
-      // Save directly to device public gallery securely
-      await Gal.putImage(image.path);
+      // ImageGallerySaver package ka use karke save kar rahe hain
+      await ImageGallerySaver.saveFile(image.path);
 
       if (!mounted) return;
-      
-      // Professional feedback dialog/snackbar
-      ScaffoldMessenger.formatSnackBar(const SnackBar(content: Text('Saved to Gallery 📸')));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.yellow),
-              SizedBox(width: 10),
-              Text('Snap saved to Gallery securely!'),
-            ],
-          ),
+          content: Text('Snap saved to Gallery securely! 📸'),
           backgroundColor: Color(0xFF222222),
           duration: Duration(milliseconds: 1200),
-          behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
@@ -169,21 +125,16 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     if (!isCameraInitialized || controller == null) {
       return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.yellow),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.yellow)),
       );
     }
 
     return Scaffold(
       body: Stack(
         children: [
-          // Camera Preview filling full screen
           Positioned.fill(
             child: CameraPreview(controller!),
           ),
-
-          // Top Controls (Flash & Switch Camera)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -199,19 +150,13 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                     onPressed: toggleFlash,
                   ),
                   IconButton(
-                    icon: const Icon(
-                      Icons.cameraswitch_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                    icon: const Icon(Icons.cameraswitch_rounded, color: Colors.white, size: 28),
                     onPressed: switchCamera,
                   ),
                 ],
               ),
             ),
           ),
-
-          // Bottom Capture Button (Snapchat Style)
           Positioned(
             bottom: 45,
             left: 0,
