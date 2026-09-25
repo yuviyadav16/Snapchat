@@ -1,0 +1,61 @@
+name: Build Snapchat APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Generate Android Folder & Apply Fixes
+        run: |
+          mv lib/main.dart temp_main.dart
+          flutter create --project-name snapchat_offline --platforms=android .
+          mv temp_main.dart lib/main.dart
+          
+          # 1. App ka naam "Snapchat" set karo
+          sed -i 's/android:label="snapchat_offline"/android:label="Snapchat"/g' android/app/src/main/AndroidManifest.xml
+          
+          # 2. CAMERA AUR STORAGE PERMISSIONS ADD KARO
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
+          
+          # 3. SDK 34 fix
+          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
+          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate App Icon
+        run: dart run flutter_launcher_icons
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK (Auto-delete in 1 Day)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snapchat-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 1
