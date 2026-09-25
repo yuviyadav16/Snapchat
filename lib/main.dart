@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:gal/gal.dart';
 import 'dart:async';
 
 List<CameraDescription> cameras = [];
@@ -99,8 +99,8 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       final image = await controller!.takePicture();
       
-      // ImageGallerySaver package ka use karke save kar rahe hain
-      await ImageGallerySaver.saveFile(image.path);
+      // Wapas modern 'Gal' package use kar rahe hain
+      await Gal.putImage(image.path);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
