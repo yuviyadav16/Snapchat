@@ -27,24 +27,25 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # IMPORTANT: Install Android SDK Platform 35 properly
+      # Install Android SDK tools
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Install Android SDK 35
       - name: Install Android SDK 35
         run: |
-          echo "Installing Android SDK Platform 35..."
-
           yes | sdkmanager --licenses || true
-
-          sdkmanager --update
 
           sdkmanager \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-          echo "Checking android.jar..."
+          echo "Checking Android 35..."
+
           test -f "$ANDROID_SDK_ROOT/platforms/android-35/android.jar"
 
-          echo "Android SDK 35 is ready."
+          echo "Android SDK 35 installed successfully."
 
       - name: Generate Android Folder & Apply Fixes
         run: |
@@ -72,48 +73,44 @@ jobs:
           sed -i '/<application/i\    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>' \
             android/app/src/main/AndroidManifest.xml
 
-          # Force Android SDK 35
+          # SDK 35
           sed -i 's/flutter.compileSdkVersion/35/g' \
             android/app/build.gradle
 
           sed -i 's/flutter.targetSdkVersion/35/g' \
             android/app/build.gradle
 
-          # Show final SDK settings
-          echo "===== build.gradle ====="
-          grep -n "compileSdk\|targetSdk" android/app/build.gradle || true
-
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Fix Gal Package
         run: |
-          find "$HOME/.pub-cache/hosted/pub.dev/" -path "*/gal-*/android/build.gradle" \
+          find "$HOME/.pub-cache/hosted/pub.dev/" \
+            -path "*/gal-*/android/build.gradle" \
             -exec sed -i 's/flutter.compileSdkVersion/35/g' {} + || true
 
-          find "$HOME/.pub-cache/hosted/pub.dev/" -path "*/gal-*/android/build.gradle" \
+          find "$HOME/.pub-cache/hosted/pub.dev/" \
+            -path "*/gal-*/android/build.gradle" \
             -exec sed -i 's/flutter.targetSdkVersion/35/g' {} + || true
 
       - name: Generate App Icon
         run: dart run flutter_launcher_icons
 
-      # Clean old Android/Gradle build files
       - name: Clean Flutter Build
         run: |
           flutter clean
           rm -rf android/.gradle
           rm -rf build
-
           flutter pub get
 
       - name: Verify Android SDK
         run: |
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "Checking Android 35..."
 
+          echo "Android 35:"
           ls -lh "$ANDROID_SDK_ROOT/platforms/android-35/android.jar"
 
-          echo "Checking Build Tools..."
+          echo "Build Tools:"
           ls -ld "$ANDROID_SDK_ROOT/build-tools/35.0.0"
 
       - name: Build APK
